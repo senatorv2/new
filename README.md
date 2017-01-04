@@ -1,23 +1,14 @@
-# [TeleMute](https://github.com/MutePuker/TeleMute)
-*TG-CLI based broadcasting bot!*
 # Install
 ```
 cd $HOME
-git clone https://github.com/MutePuker/TeleMute.git
-cd TeleMute
+git clone https://github.com/cracker1375/newtg.git
+cd newtg
 chmod +x install.sh
 ./install.sh
 ./launch.sh
 # Enter a phone number & confirmation code.
 ```
 Create a bot!
-# Help And More...
-send ```Your PM``` to @MutePukerBot in telegram
-# Developers
-* [@MutePuker](https://telegram.me/MutePuker) - Shervin
-* [@amirhossein_h_h_h](https://telegram.me/amirhossein_h_h_h) - amirhosein
-
-# Commands
 
 ### All Commands
 
@@ -78,4 +69,3 @@ send ```Your PM``` to @MutePukerBot in telegram
 > [!/]unmute all 
 >>>UnMute All MSG To Group
 
-<b>Powered By MuteTeam</b>
