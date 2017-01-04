@@ -12,60 +12,60 @@ Create a bot!
 
 ### All Commands
 
->[!/]createsuper [group name]
+> createsuper [group name]
 >
->>[!/]createsuperMute
+>>createsuperMute
 >>>will create a SuperGroup
 >>>
 >>>_Only works in realms for admins but, sudo users can use it everywhere_
 
->[!/]ping
+> ping
 >>Test Online
 >
->[!/]id
+> id
 >>Send Your ID
 
 
->[!/]pin
+> pin
 >>Pinned MSG To GRoup
 >
->[!/]unpin
+> unpin
 >>UnPinned MSG To Group
 
->[!/]lock links
+> lock links
 >>Lock Links MSG
 
->[!/]unlock links
+> unlock links
 >>UNLock Links MSG
 >
->[!/]Mute all
+> Mute all
 >>Mute All MSG To Group
 
 
-> [!/]unmute all 
+> unmute all 
 >>>UnMute All MSG To Group
 
-> [!/]settings
+> settings
 >>>Send Settings MSG
 
-> [!/]fwd
+> fwd
 >>>Forward a MSG
 
-> [!/]username [username]
+> username [username]
 >>>SetUserName For Group
 
-> [!/]echo [MSG}
+> echo [MSG}
 >>>Echo a MSG
 
-> [!/]setname [NAME]
+> setname [NAME]
 >>>Set Name For Group
 
-> [!/]edit [TEXT]
+> edit [TEXT]
 >>>Editted MSG
 
-> [!/]view [reply]
+> view [reply]
 >>>View a MSG
 
-> [!/]unmute all 
+> unmute all 
 >>>UnMute All MSG To Group
 
