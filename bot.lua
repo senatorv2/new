@@ -89,16 +89,16 @@ function tdcli_update_callback(data)
 		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>PONG</b>', 1, 'html')
       end
       if input:match("^ایدی$") then
-	  tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>SuperGroup ID : </b><code>'..string.sub(chat_id, 5,14)..'</code>\n<b>User ID : </b><code>'..user_id..'</code>\n<b>ID : </b>@H_Terminal', 1, 'html')
+	  tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ایدی سوپرگروه: </b><code>'..string.sub(chat_id, 5,14)..'</code>\n<b>ایدی یوزر: </b><code>'..user_id..'</code>\n<b>ایدی کانال تیم سناتور: </b>@Senator_tea', 1, 'html')
       end
 
       if input:match("^سنجاق") and reply_id then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>Message Pinned</b>', 1, 'html')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>سنجاق شد✅</b>', 1, 'html')
         tdcli.pinChannelMessage(chat_id, reply_id, 1)
       end
 
       if input:match("^حذف سنجاق") and reply_id then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>Message UnPinned</b>', 1, 'html')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>سنجاق حذف شد✅</b>', 1, 'html')
         tdcli.unpinChannelMessage(chat_id, reply_id, 1)
       end
 
@@ -106,12 +106,12 @@ function tdcli_update_callback(data)
 ---------------------------------------------------------------------------------------------------------------------------------
 		if input:match("^اضافه$") and is_sudo(msg) then
 		 redis:sadd('groups',chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*Group Hadd Been Addet!*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*✅add ✅!*', 1, 'md')
 		end
 		-------------------------------------------------------------------------------------------------------------------------------------------
 		if input:match("^حذف$") and is_sudo(msg) then
 		redis:srem('groups',chat_id)
-		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*Group Has Been Removed!*', 1, 'md')
+		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*✅Removed✅ !*', 1, 'md')
 		 end
 		 -----------------------------------------------------------------------------------------------------------------------------------------------
 			
@@ -299,65 +299,65 @@ groups = redis:sismember('groups',chat_id)
 	  -----------------------------------------------------------------------------------------------------------------
 local link = 'lock_linkstg:'..chat_id
 	 if redis:get(link) then
-	  link = "yes"
+	  link = "✅"
 	  else 
-	  link = "no"
+	  link = "❎"
 	 end
 	 
 	 local username = 'usernametg:'..chat_id
 	 if redis:get(username) then
-	  username = "yes"
+	  username = "✅"
 	  else 
-	  username = "no"
+	  username = "❎"
 	 end
 	 
 	 local tag = 'tagtg:'..chat_id
 	 if redis:get(tag) then
-	  tag = "yes"
+	  tag = "✅"
 	  else 
-	  tag = "no"
+	  tag = "❎"
 	 end
 	 
 	 local forward = 'forwardtg:'..chat_id
 	 if redis:get(forward) then
-	  forward = "yes"
+	  forward = "✅"
 	  else 
-	  forward = "no"
+	  forward = "❎"
 	 end
 	 
 	 local arabic = 'arabictg:'..chat_id
 	 if redis:get(arabic) then
-	  arabic = "yes"
+	  arabic = "✅"
 	  else 
-	  arabic = "no"
+	  arabic = "❎"
 	 end
 	 
 	 local eng = 'engtg:'..chat_id
 	 if redis:get(eng) then
-	  eng = "yes"
+	  eng = "✅"
 	  else 
-	  eng = "no"
+	  eng = "❎"
 	 end
 	 
 	 local badword = 'badwordtg:'..chat_id
 	 if redis:get(badword) then
-	  badword = "yes"
+	  badword = "✅"
 	  else 
-	  badword = "no"
+	  badword = "❎"
 	 end
 	 
 	 local edit = 'edittg:'..chat_id
 	 if redis:get(edit) then
-	  edit = "yes"
+	  edit = "✅"
 	  else 
-	  edit = "no"
+	  edit = "❎"
 	 end
 	 
 	 local emoji = 'emojitg:'..chat_id
 	 if redis:get(emoji) then
-	  emoji = "yes"
+	  emoji = "✅"
 	  else 
-	  emoji = "no"
+	  emoji = "❎"
 	 end
 	 ----------------------------
 		--muteall
@@ -544,103 +544,103 @@ if input:match("^ممنوعیت استیکر$") and is_sudo(msg) and groups then
 		--settings
 		local all = 'mute_alltg:'..chat_id
 	 if redis:get(all) then
-	  All = "yes"
+	  All = "✅"
 	  else 
-	  All = "no"
+	  All = "❎"
 	 end
 	 
 	 local sticker = 'mute_stickertg:'..chat_id
 	 if redis:get(sticker) then
-	  sticker = "yes"
+	  sticker = "✅"
 	  else 
-	  sticker = "no"
+	  sticker = "❎"
 	 end
 	 
 	 local gift = 'mute_gifttg:'..chat_id
 	 if redis:get(gift) then
-	  gift = "yes"
+	  gift = "✅"
 	  else 
-	  gift = "no"
+	  gift = "❎"
 	 end
 	 
 	 local contact = 'mute_contacttg:'..chat_id
 	 if redis:get(contact) then
-	  contact = "yes"
+	  contact = "✅"
 	  else 
-	  contact = "no"
+	  contact = "❎"
 	 end
 	 
 	 local photo = 'mute_phototg:'..chat_id
 	 if redis:get(photo) then
-	  photo = "yes"
+	  photo = "✅"
 	  else 
-	  photo = "no"
+	  photo = "❎"
 	 end
 	 
 	 local audio = 'mute_audiotg:'..chat_id
 	 if redis:get(audio) then
-	  audio = "yes"
+	  audio = "✅"
 	  else 
-	  audio = "no"
+	  audio = "❎"
 	 end
 	 
 	 local voice = 'mute_voicetg:'..chat_id
 	 if redis:get(voice) then
-	  voice = "yes"
+	  voice = "✅"
 	  else 
-	  voice = "no"
+	  voice = "❎"
 	 end
 	 
 	 local video = 'mute_videotg:'..chat_id
 	 if redis:get(video) then
-	  video = "yes"
+	  video = "✅"
 	  else 
-	  video = "no"
+	  video = "❎"
 	 end
 	 
 	 local document = 'mute_documenttg:'..chat_id
 	 if redis:get(document) then
-	  document = "yes"
+	  document = "✅"
 	  else 
-	  document = "no"
+	  document = "❎"
 	 end
 	 
 	 local text1 = 'mute_texttg:'..chat_id
 	 if redis:get(text1) then
-	  text1 = "yes"
+	  text1 = "✅"
 	  else 
-	  text1 = "no"
+	  text1 = "❎"
 	 end
       if input:match("^تنظیمات$") and is_sudo(msg) then
 		local text = "⚙Super Group Settings⚙".."\n"
-		.."🔰`Lock Link:` ".."*"..link.."*".."\n"
-		.."🔰`Lock Tag:` ".."*"..tag.."*".."\n"
-		.."🔰`Lock Username:` ".."*"..username.."*".."\n"
-		.."🔰`Lock Forward:` ".."*"..forward.."*".."\n"
-		.."🔰`Lock Arabic/Persian:` ".."*"..arabic..'*'..'\n'
-		.."🔰`Lock English:` ".."*"..eng..'*'..'\n'
-		.."🔰`Lock Fosh:` ".."*"..badword..'*'..'\n'
-		.."🔰`Lock Edit:` ".."*"..edit..'*'..'\n'
-		.."🔰`Lock Emoji:` ".."*"..emoji..'*'..'\n'
-		.."*➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖*".."\n"
-		.."📢Mute List📢".."\n"
-		.."🔰Mute All: *".."_"..All.."_".."\n"
-		.."🔰Mute Sticker: *".."_"..sticker.."_".."\n"
-		.."🔰Mute Gift: *".."_"..gift.."_".."\n"
-		.."🔰Mute Contact: *".."_"..contact.."_".."\n"
-		.."🔰Mute Photo: *".."_"..photo.."_".."\n"
-		.."🔰Mute Audio: *".."_"..audio.."_".."\n"
-		.."🔰Mute Voice: *".."_"..voice.."_".."\n"
-		.."🔰Mute Video: *".."_"..video.."_".."\n"
-		.."🔰Mute Document: *".."_"..document.."_".."\n"
-		.."🔰Mute Text: *".."_"..text1.."_".."\n"
+		.."🔰`قفل لینک:` ".."*"..link.."*".."\n"
+		.."🔰`قفل تگ:` ".."*"..tag.."*".."\n"
+		.."🔰`قفل یوزرنیم:` ".."*"..username.."*".."\n"
+		.."🔰`قفل فروارد:` ".."*"..forward.."*".."\n"
+		.."🔰`قفل عربی:` ".."*"..arabic..'*'..'\n'
+		.."🔰`قفل انگلیسی:` ".."*"..eng..'*'..'\n'
+		.."🔰`قفل فحش:` ".."*"..badword..'*'..'\n'
+		.."🔰`قفل ویرایش:` ".."*"..edit..'*'..'\n'
+		.."🔰`قفل ایموجی:` ".."*"..emoji..'*'..'\n'
+		.."*🚏🚏🚏🚏🚏🚏🚏🚏🚏🚏*".."\n"
+		.."📢لیست ممنوعیت📢".."\n"
+		.."🔰`ممنوعیت همه: `".."*"..All.."*".."\n"
+		.."🔰`ممنوعیت استیکر: `".."*"..sticker.."*".."\n"
+		.."🔰`ممنوعیت گیف: `".."*"..gift.."*".."\n"
+		.."🔰`ممنوعیت شماره: `".."*"..contact.."*".."\n"
+		.."🔰`ممنوعیت عکس: `".."*"..photo.."*".."\n"
+		.."🔰`ممنوعیت آهنگ: `".."*"..audio.."*".."\n"
+		.."🔰`ممنوعیت صدا: `".."*"..voice.."*".."\n"
+		.."🔰`ممنوعیت فیلم: `".."*"..video.."*".."\n"
+		.."🔰`ممنوعیت متن: `".."*"..document.."*".."\n"
+		.."🔰`ممنوعیت تکست: `".."*"..text1.."*".."\n"
 		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, text, 1, 'md')
 		end
       if input:match("^ارسال$") then
         tdcli.forwardMessages(chat_id, chat_id,{[0] = reply_id}, 0)
       end
 	  
-      if input:match("^[Uu]sername") and is_sudo(msg) then
+      if input:match("^یوزرنیم") and is_sudo(msg) then
         tdcli.changeUsername(string.sub(input, 11))
 		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>Username Changed To </b>@'..string.sub(input, 11), 1, 'html')
       end
@@ -649,23 +649,23 @@ if input:match("^ممنوعیت استیکر$") and is_sudo(msg) and groups then
 		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, string.sub(input, 7), 1, 'html')
       end
 
-      if input:match("^[Ss]etname") then
+      if input:match("^تغییر دادن اسم") then
         tdcli.changeChatTitle(chat_id, string.sub(input, 10), 1)
 		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>SuperGroup Name Changed To </b><code>'..string.sub(input, 10)..'</code>', 1, 'html')
       end
-	  if input:match("^[Cc]hangename") and is_sudo(msg) then
+	  if input:match("^چک کردن اسم") and is_sudo(msg) then
         tdcli.changeName(string.sub(input, 13), nil, 1)
 		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>Bot Name Changed To </b><code>'..string.sub(input, 13)..'</code>', 1, 'html')
       end
-	  if input:match("^[Cc]hangeuser") and is_sudo(msg) then
+	  if input:match("^چک کردن یوزر") and is_sudo(msg) then
         tdcli.changeUsername(string.sub(input, 13), nil, 1)
 		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>Bot UserName Changed To </b><code>'..string.sub(input, 13)..'</code>', 1, 'html')
       end
-	  if input:match("^[Dd]eluser") and is_sudo(msg) then
+	  if input:match("^حذف یوزر") and is_sudo(msg) then
         tdcli.changeUsername('')
 		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '#Done\nUsername Has Been Deleted', 1, 'html')
       end
-      if input:match("^[Ee]dit") then
+      if input:match("^وایش") then
         tdcli.editMessageText(chat_id, reply_id, nil, string.sub(input, 7), 'html')
       end
 
@@ -682,9 +682,9 @@ if input:match("^ممنوعیت استیکر$") and is_sudo(msg) and groups then
 		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>SuperGroup </b>'..string.sub(input, 14)..' <b>Created</b>', 1, 'html')
       end
 
-      if input:match("^view") then
+      if input:match("^هستی") then
         tdcli.viewMessages(chat_id, {[0] = msg.id_})
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>Messages Viewed</b>', 1, 'html')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>اره هستم </b>', 1, 'html')
       end
     end
 
