@@ -2,12 +2,13 @@ package.path = package.path .. ';.luarocks/share/lua/5.2/?.lua'
   .. ';.luarocks/share/lua/5.2/?/init.lua'
 package.cpath = package.cpath .. ';.luarocks/lib/lua/5.2/?.so'
 
--- @H_Terminal
+-- @Senator_tea
 tdcli = dofile('tdcli.lua')
 redis = (loadfile "./libs/redis.lua")()
 sudo_users = {
-  165859842,
-	0
+  170146015,
+  204507468,
+  196568905
 }
 
 -- Print message format. Use serpent for prettier result.
