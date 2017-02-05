@@ -915,7 +915,7 @@ if redis:get('mute_alltg:'..chat_id) and msg and not is_sudo(msg) then
       end
 
   elseif (data.ID == "UpdateOption" and data.name_ == "my_id") then
-    -- @H_Terminal
+    -- @Senator_tea
     tdcli_function ({
       ID="GetChats",
       offset_order_="9223372036854775807",
