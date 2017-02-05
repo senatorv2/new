@@ -68,7 +68,146 @@ function is_sudo(msg)
   end
   return var
 end
+for v, user in pairs(sudo_users) do
+    if user == user_id then
+      var = true
+    end
+  end
+  return var
+end
+--- function promote
+function is_mod(msg)
+  local var = false
+  local chat_id = msg.chat_id_
+  local user_id = msg.sender_user_id_
+  if redis:sismember('mods:'..chat_id,user_id) then
+    var = true
+  end
+  if  redis:get('owners:'..chat_id) == tostring(user_id) then
+    var = true
+  end
+  for v, user in pairs(sudo_users) do
+    if user == user_id then
+      var = true
+    end
+  end
+  return var
+end
+-- Print message format. Use serpent for prettier result.
+function vardump(value, depth, key)
+  local linePrefix = ''
+  local spaces = ''
+  if key ~= nil then
+    linePrefix = key .. ' = '
+  end
+  if depth == nil then
+    depth = 0
+  else
+    depth = depth + 1
+    for i=1, depth do
+      spaces = spaces .. '  '
+    end
+ 
+ if type(value) == 'table' then
+    mTable = getmetatable(value)
+    if mTable == nil then
+      print(spaces .. linePrefix .. '(table) ')
+    else
+      print(spaces .. '(metatable) ')
+      value = mTable
+    end
+    for tableKey, tableValue in pairs(value) do
+      vardump(tableValue, depth, tableKey)
+    end
+  elseif type(value)  == 'function' or
+    type(value) == 'thread' or
+    type(value) == 'userdata' or
+    value == nil then --
+    print(spaces .. tostring(value))
+  elseif type(value)  == 'string' then
+    print(spaces .. linePrefix .. '"' .. tostring(value) .. '",')
+  else
+    print(spaces .. linePrefix .. tostring(value) .. ',')
+  end
+end
 
+ -- Print callback
+function dl_cb(arg, data)
+end
+local function setowner_reply(extra, result, success)
+  t = vardump(result)
+  local msg_id = result.id_
+  local user = result.sender_user_id_
+  local ch = result.chat_id_
+  redis:del('owners:'..ch)
+  redis:set('owners:'..ch,user)
+  tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #تایید شد!\n🎗 #کاربر *'..user..'*⏳ به عنوان _مالک_ منصوب شد\n🎗', 1, 'md')
+  print(user)
+end
+
+local function deowner_reply(extra, result, success)
+  t = vardump(result)
+  local msg_id = result.id_
+  local user = result.sender_user_id_
+  local ch = result.chat_id_
+  redis:del('owners:'..ch)
+  tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #تایید شد!\n🎗 #کاربر *'..user..'* ⏳ازسمت _مالکیت_ محروم شد\n🎗', 1, 'md')
+  print(user)
+end
+ local database = 'http://vip.opload.ir/vipdl/94/11/amirhmz/'
+local function setmod_reply(extra, result, success)
+vardump(result)
+local msg = result.id_
+local user = result.sender_user_id_
+local chat = result.chat_id_
+redis:sadd('mods:'..chat,user)
+tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #تایید شد!\n🎗 #کاربر *'..user..'* ⏳به عنوان _مدیر_ منصوب شد\n🎗 ', 1, 'md')
+end
+
+local function remmod_reply(extra, result, success)
+vardump(result)
+local msg = result.id_
+local user = result.sender_user_id_
+local chat = result.chat_id_
+redis:srem('mods:'..chat,user)
+tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #تایید شد!\n🎗 #کاربر *'..user..'* ⏳ازمقام _مدیریت_ عزل شد\n🎗 ', 1, 'md')
+end
+function kick_reply(extra, result, success)
+  b = vardump(result)
+  tdcli.changeChatMemberStatus(result.chat_id_, result.sender_user_id_, 'Kicked')
+  tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #تایید شد!\n🔹کاربر *'..result.sender_user_id_..'*🔑 اخراج_ شد_\n🎗 ', 1, 'md')
+end
+function ban_reply(extra, result, success)
+  b = vardump(result)
+  tdcli.changeChatMemberStatus(result.chat_id_, result.sender_user_id_, 'Banned')
+  tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #تایید شد!\n🔹کاربر *'..result.sender_user_id_..'*🔑 بن_ شد_\n🎗 ', 1, 'md')
+end
+local function setmute_reply(extra, result, success)
+  vardump(result)
+  redis:sadd('muteusers:'..result.chat_id_,result.sender_user_id_)
+  tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #کاربر *'..result.sender_user_id_..'*🔇 به لیست _ساکت شدگان_ افزوده شد\n🎗 ', 1, 'md')
+end
+
+local function demute_reply(extra, result, success)
+  vardump(result)
+  redis:srem('muteusers:'..result.chat_id_,result.sender_user_id_)
+  tdcli.sendText(result.chat_id_, 0, 0, 1, nil, '🏅 #کاربر *'..result.sender_user_id_..'*🔊 ازلیست _ساکت شدگان_ حذف شد\n🎗 ', 1, 'md')
+end
+function setphoto(chat_id, photo)
+ tdcli_function ({
+   ID = "ChangeChatPhoto",
+    chat_id_ = chat_id,
+  photo_ = getInputFile(photo)
+  }, dl_cb, nil)
+end
+function delete_msg(chatid,mid)
+  tdcli_function ({
+ ID="DeleteMessages", 
+  chat_id_=chatid, 
+  message_ids_=mid
+  },
+ dl_cb, nil)
+end
 
 function tdcli_update_callback(data)
   vardump(data)
@@ -172,13 +311,13 @@ function tdcli_update_callback(data)
       sm = input:match('^[/!#]promote (.*)') or input:match('^promote (.*)') or input:match('^ارتقا (.*)')
 if sm and is_owner(msg) then
   redis:sadd('mods:'..chat_id,sm)
-  tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #انجام شد!\n🏅 #کاربر '..sm..'⏳به عنوان _مدیر_ منصوب شد\n🎗 ', 1, 'md')
+  tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #تایید شد!\n🏅 #کاربر '..sm..'⏳به عنوان _مدیر_ منصوب شد\n🎗 ', 1, 'md')
 end
 			
        dm = input:match('^[/!#]demote (.*)') or input:match('^demote (.*)') or input:match('^عزل (.*)')
 if dm and is_owner(msg) then
   redis:srem('mods:'..chat_id,dm)
-  tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #انجام شد\n🏅 #کاربر '..dm..'⏳از مقام _مدیر_ عزل شد\n🎗 ', 1, 'md')
+  tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #تایید شد\n🏅 #کاربر '..dm..'⏳از مقام _مدیر_ عزل شد\n🎗 ', 1, 'md')
 end
 if input:match('^[/!#]modlist') and is_mod(msg) or input:match('^modlist') and is_mod(msg) or input:match('^لیست مدیران') and is_mod(msg) then
 if redis:scard('mods:'..chat_id) == 0 then
@@ -269,7 +408,7 @@ end
 		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>لینک از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('lock_linkstg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '_لینک قفل شد_', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ارسال لینک قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن لینک$")  and is_sudo(msg) and groups then
