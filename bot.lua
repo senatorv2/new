@@ -68,13 +68,7 @@ function is_sudo(msg)
   end
   return var
 end
-for v, user in pairs(sudo_users) do
-    if user == user_id then
-      var = true
-    end
-  end
-  return var
-end
+
 --- function promote
 function is_mod(msg)
   local var = false
