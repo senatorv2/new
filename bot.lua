@@ -43,7 +43,7 @@ function vardump(value, depth, key)
   elseif type(value)  == 'function' or 
     type(value) == 'thread' or 
     type(value) == 'userdata' or 
-    value == nil then --@H_Terminal
+    value == nil then --@Senator_tea
       print(spaces .. tostring(value))
   elseif type(value)  == 'string' then
     print(spaces .. linePrefix .. '"' .. tostring(value) .. '",')
@@ -106,20 +106,167 @@ function tdcli_update_callback(data)
 ---------------------------------------------------------------------------------------------------------------------------------
 		if input:match("^اضافه$") and is_sudo(msg) then
 		 redis:sadd('groups',chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ربات به گروه اضافه شد✅</b>!*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ربات به گروه اضافه شد✅<🚏>!*', 1, 'md')
 		end
 		-------------------------------------------------------------------------------------------------------------------------------------------
 		if input:match("^حذف$") and is_sudo(msg) then
 		redis:srem('groups',chat_id)
-		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*✅<b>ربات از گروه رفت</b>✅ !*', 1, 'md')
+		 tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*✅<🚏>ربات از گروه رفت<🚏>✅ !*', 1, 'md')
 		 end
 		 -----------------------------------------------------------------------------------------------------------------------------------------------
 			
-			--lock links
-groups = redis:sismember('groups',chat_id)
-      if input:match("^قفل لینک$") and is_sudo(msg) and groups then
+		
+							
+      if input:match('^[!#/]([Ss]etowner)$') and is_owner(msg) and msg.reply_to_message_id_ or input:match('^([Ss]etowner)$') and is_owner(msg) and msg.reply_to_message_id_ or input:match('^تنظیم مالک$') and is_owner(msg) and msg.reply_to_message_id_ then
+          tdcli.getMessage(chat_id,msg.reply_to_message_id_,setowner_reply,nil)
+      end
+			
+			
+        if input:match('^[!#/](Dd]elowner)$') and is_sudo(msg) and msg.reply_to_message_id_ or input:match('^(Dd]elowner)$') and is_sudo(msg) and msg.reply_to_message_id_ or input:match('^حذف مالک$') and is_sudo(msg) and msg.reply_to_message_id_ then
+          tdcli.getMessage(chat_id,msg.reply_to_message_id_,deowner_reply,nil)
+      end
+			
+			
+        if input:match('^[!#/]([Oo]wner)$') or input:match('^([Oo]wner)$') or input:match('^مالک$') then
+        local hash = 'owners:'..chat_id		
+         local owner = redis:get(hash)
+        if owner == nil then
+          tdcli.sendText(chat_id, 0, 0, 1, nil, '🔸گروه `مالک` ندارد \n🎗 ', 1, 'md')
+        end
+	
+        local owner_list = redis:get('owners:'..chat_id)
+        text85 = '🎗 `مالک گروه:`\n\n '..owner_list		
+         tdcli.sendText(chat_id, 0, 0, 1, nil, text85, 1, 'md')
+      end	
+	
+        if input:match('^[/!#]setowner (.*)') and not input:find('@') and is_sudo(msg) then
+        redis:del('owners:'..chat_id)		
+        redis:set('owners:'..chat_id,input:match('^[/!#]setowner (.*)'))
+        tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..input:match('^[/!#]setowner (.*)')..' ⏳به عنوان `مالک` منصوب شد\n🎗', 1, 'md')
+      end
+
+      if input:match('^[/!#]setowner (.*)') and input:find('@') and is_owner(msg) then
+        function Inline_Callback_(arg, data)
+          redis:del('owners:'..chat_id)
+					
+      redis:set('owners:'..chat_id,input:match('^[/!#]setowner (.*)'))
+          tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..input:match('^[/!#]setowner (.*)')..'⏳ به عنوان `مالک` منصوب شد\n🎗', 1, 'md')
+        end
+        tdcli_function ({ID = "SearchPublicChat",username_ =input:match('^[/!#]setowner (.*)')}, Inline_Callback_, nil)
+      end
+			
+     if input:match('^[/!#]delowner (.*)') and is_sudo(msg) then
+        redis:del('owners:'..chat_id)
+        tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..input:match('^[/!#]delowner (.*)')..' ⌛از عنوان `مالک` محروم شد\n🎗 ', 1, 'md')
+      end
+			
+-------------------------------------------------------------------------------         
+			
+      if input:match('^[/!#]promote') and is_owner(msg) and msg.reply_to_message_id_ or input:match('^promote') and is_owner(msg) and msg.reply_to_message_id_ or input:match('^ارتقا') and is_owner(msg) and msg.reply_to_message_id_ then
+          tdcli.getMessage(chat_id,msg.reply_to_message_id_,setmod_reply,nil)
+      end
+      if input:match('^[/!#]demote') and is_owner(msg) and msg.reply_to_message_id_ or input:match('^demote') and is_owner(msg) and msg.reply_to_message_id_ or input:match('^عزل') and is_owner(msg) and msg.reply_to_message_id_ then
+        tdcli.getMessage(chat_id,msg.reply_to_message_id_,remmod_reply,nil)
+      end
+		
+      sm = input:match('^[/!#]promote (.*)') or input:match('^promote (.*)') or input:match('^ارتقا (.*)')
+if sm and is_owner(msg) then
+  redis:sadd('mods:'..chat_id,sm)
+  tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #انجام شد!\n🏅 #کاربر '..sm..'⏳به عنوان _مدیر_ منصوب شد\n🎗 ', 1, 'md')
+end
+			
+       dm = input:match('^[/!#]demote (.*)') or input:match('^demote (.*)') or input:match('^عزل (.*)')
+if dm and is_owner(msg) then
+  redis:srem('mods:'..chat_id,dm)
+  tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #انجام شد\n🏅 #کاربر '..dm..'⏳از مقام _مدیر_ عزل شد\n🎗 ', 1, 'md')
+end
+if input:match('^[/!#]modlist') and is_mod(msg) or input:match('^modlist') and is_mod(msg) or input:match('^لیست مدیران') and is_mod(msg) then
+if redis:scard('mods:'..chat_id) == 0 then
+tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅گروه _مدیری_ ندارد⏳', 1, 'md')
+end
+	
+    local text = "🏅 `لیست مدیران` : \n"
+for k,v in pairs(redis:smembers('mods:'..chat_id)) do
+text = text.."_"..k.."_ - *"..v.."*\n"
+end
+tdcli.sendText(chat_id, 0, 0, 1, nil, text, 1, 'md')
+end
+-------------------------------------------------------------
+			
+      if input:match('^[/!#]setlink (.*)') and is_owner(msg) then
+redis:set('link'..chat_id,input:match('^[/!#]setlink (.*)'))
+tdcli.sendText(chat_id, 0, 0, 1, nil, 'لينک گروه ذخيره شد🏅\n', 1, 'html')
+end
+if input:match('^[/!#]link$') and is_mod(msg) or input:match('^link$') and is_mod(msg) or input:match('^لينک$') and is_mod(msg) then
+link = redis:get('link'..chat_id)
+tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅لينک گروه :\n'..link, 1, 'html')
+end
+-------------------------------------------------------
+			
+      if input:match('^[/!#]setrules (.*)') and is_owner(msg) then
+redis:set('gprules'..chat_id,input:match('^[/!#]setrules (.*)'))
+tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅قوانين ثبت شد', 1, 'html')
+end
+if input:match('^[/!#]rules$') and is_mod(msg) or input:match('^rules$') and is_mod(msg) or input:match('^قوانين$') and is_mod(msg) then
+rules = redis:get('gprules'..chat_id)
+tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅قوانين گروه :\n'..rules, 1, 'html')
+end
+--------------------------------------------------------------------------
+			
+      if input:match('^[!#/](kick)$') and is_mod(msg) or input:match('^(kick)$') and is_mod(msg) or input:match('^اخراج$') and is_mod(msg) then
+        tdcli.getMessage(chat_id,reply,kick_reply,nil)
+      end
+      if input:match('^[!#/]kick (.*)') and not input:find('@') and is_mod(msg) then
+        tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..input:match('^[!#/]kick (.*)')..' `⏳اخراج`شد\n🎗 ', 1, 'md')
+        tdcli.changeChatMemberStatus(chat_id, input:match('^[!#/]kick (.*)'), 'Kicked')
+      end
+      if input:match('^[!#/]kick (.*)') and input:find('@') and is_mod(msg) then
+        function Inline_Callback_(arg, data)
+          tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..input:match('^[!#/]kick (.*)')..' `⏳اخراج`شد\n🎗 ', 1, 'md')
+          tdcli.changeChatMemberStatus(chat_id, data.id_, 'Kicked')
+        end
+        tdcli_function ({ID = "SearchPublicChat",username_ =input:match('^[!#/]kick (.*)')}, Inline_Callback_, nil)
+      end
+--------------------------------------------------------
+ ----------------------------------------------------------
+			
+      if input:match('^[/!#]muteuser') and is_mod(msg) and msg.reply_to_message_id_ or input:match('^muteuser') and is_mod(msg) and msg.reply_to_message_id_ or input:match('^ساکت کردن') and is_mod(msg) and msg.reply_to_message_id_ then
+        redis:set('tbt:'..chat_id,'yes')
+        tdcli.getMessage(chat_id,msg.reply_to_message_id_,setmute_reply,nil)
+      end
+      if input:match('^[/!#]unmuteuser') and is_mod(msg) and msg.reply_to_message_id_ or input:match('^unmuteuser') and is_mod(msg) and msg.reply_to_message_id_ or input:match('^-ساکت کردن') and is_mod(msg) and msg.reply_to_message_id_ then
+        tdcli.getMessage(chat_id,msg.reply_to_message_id_,demute_reply,nil)
+      end
+      mu = input:match('^[/!#]muteuser (.*)') or input:match('^muteuser (.*)') or input:match('^ساکت کردن (.*)')
+      if mu and is_mod(msg) then
+        redis:sadd('muteusers:'..chat_id,mu)
+        redis:set('tbt:'..chat_id,'yes')
+        tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..mu..'🔇 به `لیست ساکت شدگان` افزوده شد\n🎗 ', 1, 'md')
+      end
+      umu = input:match('^[/!#]unmuteuser (.*)') or input:match('^unmuteuser (.*)') or input:match('^-ساکت کردن (.*)')
+      if umu and is_mod(msg) then
+        redis:srem('muteusers:'..chat_id,umu)
+        tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅 #کاربر '..umu..'🔊 از `لیست ساکت شدگان` حذف شد\n🎗 ', 1, 'md')
+      end
+      if input:match('^[/!#]muteusers') and is_mod(msg) or input:match('^muteusers') and is_mod(msg) or input:match('^لیست ساکت شدگان') and is_mod(msg) then
+        if redis:scard('muteusers:'..chat_id) == 0 then
+          tdcli.sendText(chat_id, 0, 0, 1, nil, '🏅🔇گروه هیچ `فرد ساکت شده ای` ندارد🏅', 1, 'md')
+        end
+        local text = "🏅🔉لیست ساکت شدگان:\n"
+        for k,v in pairs(redis:smembers('muteusers:'..chat_id)) do
+          text = text.."<b>"..k.."</b> - <b>"..v.."</b>\n"
+        end
+        tdcli.sendText(chat_id, 0, 0, 1, nil, text, 1, 'html')
+      end
+-------------------------------------------------------
+			
+         --lock links
+			
+     groups = redis:sismember('groups',chat_id)
+
+    if input:match("^قفل لینک$") and is_sudo(msg) and groups then
        if redis:get('lock_linkstg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>لینک از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>لینک از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('lock_linkstg:'..chat_id, true)
 		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '_لینک قفل شد_', 1, 'md')
@@ -127,172 +274,172 @@ groups = redis:sismember('groups',chat_id)
       end 
       if input:match("^بازکردن لینک$")  and is_sudo(msg) and groups then
        if not redis:get('lock_linkstg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>لینک از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>لینک از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('lock_linkstg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>لینک آزاد شد✅</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>لینک آزاد شد✅<🚏>', 1, 'md')
       end
       end
 	  --lock username
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل یوزرنیم$") and is_sudo(msg) and groups then
        if redis:get('usernametg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ارسال یوزرنیم از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>ارسال یوزرنیم از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('usernametg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>ارسال یوزرنیم قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ارسال یوزرنیم قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن یوزرنیم$") and is_sudo(msg) and groups then
        if not redis:get('usernametg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ارسال یوزرنیم از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>ارسال یوزرنیم از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('usernametg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>ارسال یوزرنیم آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ارسال یوزرنیم آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --lock tag
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل تگ$") and is_sudo(msg) and groups then
        if redis:get('tagtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ارسال تگ از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>ارسال تگ از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('tagtg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>ارسال تگ قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ارسال تگ قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن تگ$") and is_sudo(msg) and groups then
        if not redis:get('tagtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ارسال تگ از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>ارسال تگ از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('tagtg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>ارسال تگ آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ارسال تگ آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --lock forward
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل فروارد$") and is_sudo(msg) and groups then
        if redis:get('forwardtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>فروارد کردن از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>فروارد کردن از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('forwardtg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>فروارد کردن قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>فروارد کردن قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن فروارد$") and is_sudo(msg) and groups then
        if not redis:get('forwardtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>فروارد کردن از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>فروارد کردن از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('forwardtg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>فروارد کردن آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>فروارد کردن آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --arabic/persian
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل عربی$") and is_sudo(msg) and groups then
        if redis:get('arabictg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>استفاده از کلمات عربی از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>استفاده از کلمات عربی از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('arabictg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>استفاده از کلمات عربی قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>استفاده از کلمات عربی قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن عربی$") and is_sudo(msg) and groups then
        if not redis:get('arabictg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>استفاده از کلمات عربی از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>استفاده از کلمات عربی از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('arabictg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>استفاده از کلمات عربی آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>استفاده از کلمات عربی آزاد شد<🚏>', 1, 'md')
       end
       end
 	 ---english
 	 groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل انگلیسی$") and is_sudo(msg) and groups then
        if redis:get('engtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>استفاده از کلمات انگلیسی از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>استفاده از کلمات انگلیسی از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('engtg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>استفاده از کلمات انگلیسی قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>استفاده از کلمات انگلیسی قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن انگلیسی$") and is_sudo(msg) and groups then
        if not redis:get('engtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>استفاده از کلمات انگلیسی از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>استفاده از کلمات انگلیسی از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('engtg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>استفاده از کلمات انگلیسی آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>استفاده از کلمات انگلیسی آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --lock foshtg
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل فحش$") and is_sudo(msg) and groups then
        if redis:get('badwordtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>فحش از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>فحش از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('badwordtg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>فحش ممنوع شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>فحش ممنوع شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن فحش$") and is_sudo(msg) and groups then
        if not redis:get('badwordtg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>فحش از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>فحش از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('badwordtg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>فحش آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>فحش آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --lock edit
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل ویرایش$") and is_sudo(msg) and groups then
        if redis:get('edittg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ویرایش از قبل ممنوع بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>ویرایش از قبل ممنوع بود<🚏>', 1, 'md')
        else 
         redis:set('edittg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>ویرایش قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ویرایش قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن ویرایش$") and is_sudo(msg) and groups then
        if not redis:get('edittg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>ویرایش از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>ویرایش از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('edittg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>ویرایش آزاد شد</b>d', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>ویرایش آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --lock emoji
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل ایموجی") and is_sudo(msg) and groups then
        if redis:get('emojitg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>شکلک از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>شکلک از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('emojitg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>شکلک قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>شکلک قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن ایموجی$") and is_sudo(msg) and groups then
        if not redis:get('emojitg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>شکلک از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>شکلک از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('emojitg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>شکلک آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>شکلک آزاد شد<🚏>', 1, 'md')
       end
       end
 	  --lock tgservice
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^قفل سرویس$") and is_sudo(msg) and groups then
        if redis:get('tgservice:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>سرویس ها از قبل قفل بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>سرویس ها از قبل قفل بود<🚏>', 1, 'md')
        else 
         redis:set('tgservice:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>سرویس ها قفل شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>سرویس ها قفل شد<🚏>', 1, 'md')
       end
       end 
       if input:match("^بازکردن سرویس$") and is_sudo(msg) and groups then
        if not redis:get('tgservice:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<b>سرویس ها از قبل آزاد بود</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '<🚏>سرویس ها از قبل آزاد بود<🚏>', 1, 'md')
        else
          redis:del('tgservice:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<b>سرویس ها آزاد شد</b>', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '✅ #تایید شد\n<🚏>سرویس ها آزاد شد<🚏>', 1, 'md')
       end
       end
 	  
@@ -364,18 +511,18 @@ local link = 'lock_linkstg:'..chat_id
 		groups = redis:sismember('groups',chat_id)
             if input:match("^ممنوعیت همه$") and is_sudo(msg) and groups then
        if redis:get('mute_alltg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال همه چی از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال همه چی از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
        redis:set('mute_alltg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال همه چی ممنوع است</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال همه چی ممنوع است<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن همه$") and is_sudo(msg) and groups then
        if not redis:get('mute_alltg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال همخ چی از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال همخ چی از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_alltg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال همه چی آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال همه چی آزاد شد<🚏>*', 1, 'md')
       end
       end	 
 
@@ -383,162 +530,162 @@ local link = 'lock_linkstg:'..chat_id
 groups = redis:sismember('groups',chat_id)
 if input:match("^ممنوعیت استیکر$") and is_sudo(msg) and groups then
        if redis:get('mute_stickertg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال استیکر از قبل قفل بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال استیکر از قبل قفل بود<🚏>*', 1, 'md')
        else
         redis:set('mute_stickertg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>رسال استیکر ممنوع است</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>رسال استیکر ممنوع است<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن استیکر$") and is_sudo(msg) and groups then
        if not redis:get('mute_stickertg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>رسال استیکر از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>رسال استیکر از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_stickertg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال استیکر آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال استیکر آزاد شد<🚏>*', 1, 'md')
       end
       end		  
 	  --mute gift
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^ممنوعیت گیف$") and is_sudo(msg) and groups then
        if redis:get('mute_contacttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال گیفاز قبل قفل بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال گیفاز قبل قفل بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_contacttg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال گیف قفل شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال گیف قفل شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن گیف$") and is_sudo(msg) and groups then
        if not redis:get('mute_contacttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال گیف از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال گیف از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_contacttg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>گیف آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>گیف آزاد شد<🚏>*', 1, 'md')
       end
       end
 	  --mute contact
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^ممنوعیت شماره$") and is_sudo(msg) and groups then
        if redis:get('mute_contacttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال شماره از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال شماره از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_contacttg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال شماره ممنوع شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال شماره ممنوع شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن شماره$") and is_sudo(msg) and groups then
        if not redis:get('mute_contacttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال شماره از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال شماره از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_contacttg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال شماره آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال شماره آزاد شد<🚏>*', 1, 'md')
       end
       end
 	  --mute photo
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^ممنوعیت عکس$") and is_sudo(msg) and groups then
        if redis:get('mute_phototg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال عکس از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال عکس از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_phototg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال عکس ممنوع شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال عکس ممنوع شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن عکس$") and is_sudo(msg) and groups then
        if not redis:get('mute_phototg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال عکس از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال عکس از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_phototg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال عکس آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال عکس آزاد شد<🚏>*', 1, 'md')
       end
       end
 	  --mute audio
 	  groups = redis:sismember('groups',chat_id)
 	  if input:match("^ممنوعیت آهنگ$") and is_sudo(msg) and groups then
        if redis:get('mute_audiotg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال آهنگ از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال آهنگ از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_audiotg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال آهنگ ممنوع شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال آهنگ ممنوع شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن آهنگ$") and is_sudo(msg) and groups then
        if not redis:get('mute_audiotg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال آهنگ از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال آهنگ از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_audiotg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال آهنگ آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال آهنگ آزاد شد<🚏>*', 1, 'md')
 	  end
       end
 		--mute voice
 		groups = redis:sismember('groups',chat_id)
 		if input:match("^ممنوعیت صدا$") and is_sudo(msg) and groups then
        if redis:get('mute_voicetg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال صدا از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال صدا از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_voicetg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال صدا ممنوع شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال صدا ممنوع شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن صدا$") and is_sudo(msg) and groups then
        if not redis:get('mute_voicetg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال صدا از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال صدا از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_videotg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال صدا آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال صدا آزاد شد<🚏>*', 1, 'md')
 		end
 		end
 		--mute video
 		groups = redis:sismember('groups',chat_id)
 		if input:match("^ممنوعیت فیلم $") and is_sudo(msg) and groups then
        if redis:get('mute_videotg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال فیلم از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال فیلم از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_videotg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال فیلم ممنوع شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال فیلم ممنوع شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن فیلم$") and is_sudo(msg) and groups then
        if not redis:get('mute_videotg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال فیلم از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال فیلم از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_videotg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال فیلم آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال فیلم آزاد شد<🚏>*', 1, 'md')
 		end
 		end
 		--mute document
 		groups = redis:sismember('groups',chat_id)
 		if input:match("^ممنوعیت یاداشت$") and is_sudo(msg) and groups then
        if redis:get('mute_documenttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال یاداشت از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال یاداشت از قبل ممنوع بود<🚏>*', 1, 'md')
        else 
         redis:set('mute_documenttg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال یاداشت ممنوع شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال یاداشت ممنوع شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن یاداشت$") and is_sudo(msg) and groups then
        if not redis:get('mute_documenttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال یاداشت از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال یاداشت از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_documenttg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال یاداشت آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال یاداشت آزاد شد<🚏>*', 1, 'md')
 		end
 		end
 		--mute  text
 		groups = redis:sismember('groups',chat_id)
 		if input:match("^ممنوعیت متن$") and is_sudo(msg) and groups then
        if redis:get('mute_texttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال متن از قبل ممنوع بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال متن از قبل ممنوع بود</b>*', 1, 'md')
        else 
         redis:set('mute_texttg:'..chat_id, true)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*ارسال متن ممنوع شد*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال یاداشت قفل شد<🚏>*', 1, 'md')
       end
       end
       if input:match("^بازکردن متن$") and is_sudo(msg) and groups then
        if not redis:get('mute_texttg:'..chat_id) then
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال متن از قبل آزاد بود</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال متن از قبل آزاد بود<🚏>*', 1, 'md')
        else 
          redis:del('mute_texttg:'..chat_id)
-		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<b>ارسال متن آزاد شد</b>*', 1, 'md')
+		tdcli.sendText(chat_id, msg.id_, 0, 1, nil, '*<🚏>ارسال متن آزاد شد<🚏>*', 1, 'md')
 		end
 		end
 		--settings
@@ -612,7 +759,7 @@ if input:match("^ممنوعیت استیکر$") and is_sudo(msg) and groups then
 	  text1 = "❎"
 	 end
       if input:match("^تنظیمات$") and is_sudo(msg) then
-		local text = "⚙Super Group Settings⚙".."\n"
+		local text = "💈تنظیمات سوپرگروه💈".."\n"
 		.."🔰`قفل لینک:` ".."*"..link.."*".."\n"
 		.."🔰`قفل تگ:` ".."*"..tag.."*".."\n"
 		.."🔰`قفل یوزرنیم:` ".."*"..username.."*".."\n"
