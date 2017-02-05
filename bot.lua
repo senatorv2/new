@@ -87,43 +87,6 @@ function is_mod(msg)
   end
   return var
 end
--- Print message format. Use serpent for prettier result.
-function vardump(value, depth, key)
-  local linePrefix = ''
-  local spaces = ''
-  if key ~= nil then
-    linePrefix = key .. ' = '
-  end
-  if depth == nil then
-    depth = 0
-  else
-    depth = depth + 1
-    for i=1, depth do
-      spaces = spaces .. '  '
-    end
- 
- if type(value) == 'table' then
-    mTable = getmetatable(value)
-    if mTable == nil then
-      print(spaces .. linePrefix .. '(table) ')
-    else
-      print(spaces .. '(metatable) ')
-      value = mTable
-    end
-    for tableKey, tableValue in pairs(value) do
-      vardump(tableValue, depth, tableKey)
-    end
-  elseif type(value)  == 'function' or
-    type(value) == 'thread' or
-    type(value) == 'userdata' or
-    value == nil then --
-    print(spaces .. tostring(value))
-  elseif type(value)  == 'string' then
-    print(spaces .. linePrefix .. '"' .. tostring(value) .. '",')
-  else
-    print(spaces .. linePrefix .. tostring(value) .. ',')
-  end
-end
 
  -- Print callback
 function dl_cb(arg, data)
